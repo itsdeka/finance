@@ -4,4 +4,4 @@ numpy
 matplotlib
 pandas
 statsmodels
-pypfopt
+pyportfolioopt
