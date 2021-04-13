@@ -1,0 +1,6 @@
+cvxpy==1.1.12
+cvxopt==1.2.6
+numpy
+matplotlib
+pandas
+statsmodels
