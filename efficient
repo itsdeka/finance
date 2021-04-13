@@ -1,0 +1,44 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+import pandas as pd
+import pandas_datareader as web
+from pypfopt.efficient_frontier import EfficientFrontier
+from pypfopt import discrete_allocation
+from pypfopt import risk_models
+from pypfopt import expected_returns
+from pypfopt import plotting
+import matplotlib.pyplot as plt
+
+tickers = ['NGM', 'IOO', 'DIA', 'AGG']
+thelen = len(tickers)
+price_data = []
+for ticker in range(thelen):
+    prices = web.DataReader(tickers[ticker], start='2015-01-01', end = '2020-06-06', data_source='yahoo')
+    price_data.append(prices.assign(ticker=ticker)[['Adj Close']])
+
+df_stocks = pd.concat(price_data, axis=1)
+df_stocks.columns=tickers
+df_stocks.head()
+
+#Annualized Return
+mu = expected_returns.mean_historical_return(df_stocks)
+#Sample Variance of Portfolio
+Sigma = risk_models.sample_cov(df_stocks)
+
+#Max Sharpe Ratio - Tangent to the EF
+ef = EfficientFrontier(mu, Sigma, weight_bounds=(0,1)) #weight bounds in negative allows shorting of stocks
+
+fig, ax = plt.subplots()
+plotting.plot_efficient_frontier(ef)
+plt.show()
+
+sharpe_pfolio=ef.max_sharpe() #May use add objective to ensure minimum zero weighting to individual stocks
+sharpe_pwt=ef.clean_weights()
+
+latest_prices = discrete_allocation.get_latest_prices(df_stocks)
+# Allocate Portfolio Value in $ as required to show number of shares/stocks to buy, also bounds for shorting will affect allocation
+#Min Volatility Portfolio Allocation $10000
+allocation_minv, rem_minv = discrete_allocation.DiscreteAllocation(sharpe_pwt, latest_prices, total_portfolio_value=10000).lp_portfolio()
+print(allocation_minv)
+print("Leftover Fund value in$ after building minimum volatility portfolio is ${:.2f}".format(rem_minv))
