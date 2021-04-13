@@ -10,7 +10,7 @@ from pypfopt import expected_returns
 from pypfopt import plotting
 import matplotlib.pyplot as plt
 
-tickers = ['NGM', 'IOO', 'DIA', 'AGG']
+tickers = ['XAR', 'IOO', 'DIA', 'AGG']
 thelen = len(tickers)
 price_data = []
 for ticker in range(thelen):
@@ -27,18 +27,14 @@ mu = expected_returns.mean_historical_return(df_stocks)
 Sigma = risk_models.sample_cov(df_stocks)
 
 #Max Sharpe Ratio - Tangent to the EF
-ef = EfficientFrontier(mu, Sigma, weight_bounds=(0,1)) #weight bounds in negative allows shorting of stocks
+ef = EfficientFrontier(mu, Sigma, weight_bounds=(0,1))
 
 fig, ax = plt.subplots()
 plotting.plot_efficient_frontier(ef)
+ef.max_sharpe()
+ret_tangent, std_tangent, _ = ef.portfolio_performance()
+ax.scatter(std_tangent, ret_tangent, marker="*", s=100, c="r", label="Max Sharpe")
+ax.set_title("Efficient Frontier")
+ax.legend()
+plt.tight_layout()
 plt.show()
-
-sharpe_pfolio=ef.max_sharpe() #May use add objective to ensure minimum zero weighting to individual stocks
-sharpe_pwt=ef.clean_weights()
-
-latest_prices = discrete_allocation.get_latest_prices(df_stocks)
-# Allocate Portfolio Value in $ as required to show number of shares/stocks to buy, also bounds for shorting will affect allocation
-#Min Volatility Portfolio Allocation $10000
-allocation_minv, rem_minv = discrete_allocation.DiscreteAllocation(sharpe_pwt, latest_prices, total_portfolio_value=10000).lp_portfolio()
-print(allocation_minv)
-print("Leftover Fund value in$ after building minimum volatility portfolio is ${:.2f}".format(rem_minv))
