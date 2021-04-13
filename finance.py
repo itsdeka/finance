@@ -8,19 +8,19 @@ import statsmodels.api as sm
 import numpy as np
 
 
-def get_expected_returns(database):
-    expected_returns = []
+def get_returns(database):
+    returns = []
 
     for i in range(0, len(database[symbols[0]]['monthly_log_returns'])):
         expected_return = 0
         for symbol in symbols:
             if symbol != '^GSPC':
                 expected_return += database[symbol]['monthly_log_returns'].iloc[i] * database[symbol]['allocation']
-        expected_returns.append(expected_return)
+        returns.append(expected_return)
         print(
             f"{database[symbols[0]]['monthly_log_returns'].index[i]} | Expected return: {round(expected_return * 100, 2)}%")
 
-    return expected_returns
+    return returns
 
 bmth_us = CustomBusinessMonthBegin(calendar=USFederalHolidayCalendar())
 
@@ -61,9 +61,9 @@ while True:
                     answer = None
             total_allocation += float(answer)
     if total_allocation == 1.0:
-        expected_returns = get_expected_returns(database)
+        returns = get_returns(database)
         X = database['^GSPC']['monthly_log_returns'].dropna()
-        y = expected_returns[1:]
+        y = returns[1:]
         X1 = sm.add_constant(X)
         model = sm.OLS(y, X1)
         results = model.fit()
