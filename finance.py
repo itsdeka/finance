@@ -30,7 +30,7 @@ end_date = '2021-04-13'
 # +++STEP 1: FORM THE PORTFOLIO
 
 # Load the desired data
-symbols = ['^GSPC', 'AMJ', 'QABA', 'DIA', 'AGG']
+symbols = ['^GSPC', 'XAR', 'IOO', 'DIA', 'AGG']
 database = {}
 
 for symbol in symbols:
